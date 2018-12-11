@@ -1,0 +1,171 @@
+.ek-hidden
+{
+	display:none;
+}
+
+
+.projectTableChosenItem
+
+{
+	font-size:12px;
+	color:green;
+}
+
+#basket-add-success-div
+{
+	border:1px solid green;
+	
+	background:#fbfff9;
+	border-radius:3px;
+	padding:8px;
+	font-size:20px;
+}
+
+
+.basketWrap h1
+{
+	padding-bottom:10px;
+}
+
+
+.project-delete-confirm
+{
+	padding-top:10px;
+	color:red;
+	
+}
+.ek-basket-remove-confirm
+{
+	margin-top:10px;
+}
+
+.basketWrap
+{
+	padding-bottom:20px;
+}
+
+
+.projectBasketItem
+{
+	border:1px solid #ccc;
+	padding:10px;
+	margin:10px 0px;
+}
+
+.projectBasketItemMeta
+{
+	margin:10px 0px 5px 0px;
+}
+
+
+#basket-add-button-div button, .finaliseProjectsDiv button
+{
+	margin-top:20px;
+	padding:10px;
+	background:#498acc;
+	color:#fff;
+	border-radius:5px;
+	border:1px solid #336699;
+	font-size:20px;
+}
+
+#basket-add-button-div button:hover, .finaliseProjectsDiv button:hover
+{
+	cursor:pointer;
+	background:#336699;
+}
+
+#finaliseConfirmDiv
+{
+
+	font-size:14px;
+}
+
+
+.projectBasketItemMeta button
+{
+	padding:8px;
+	border:1px solid #ccc;
+	background:#fcfcfc;
+	border-radius:3px;
+	font-size:10px;
+
+}
+
+.projectBasketItemMeta button:hover
+{
+	cursor:pointer;
+	background:#f1f1f1;
+
+}
+
+.finaliseProjectsDiv
+{
+
+}
+
+
+
+.finalisedMessage
+{
+	margin:20px 0px;
+	border:1px solid green;
+	padding:10px;
+	background:#fbfff9;
+	border-radius:3px;
+	font-weight:bold;	
+	
+}
+
+.dataTable th
+{
+	text-align:left;
+}
+
+.dataTable td
+{
+	border-bottom:1px solid #ccc;
+}
+
+
+.ek_project_wrapper
+{
+	display:flex;	
+	
+}
+
+.ek_project_wrapper > div
+{
+	
+}
+
+.ek_project_wrapper .project_info
+{
+	flex-grow: 1;
+	margin-right:80px;  
+}
+
+
+
+.ek_project_wrapper .project_side
+{
+	min-width:350px;
+}
+
+
+
+
+@media screen and (max-width: 600px) {
+  .ek_project_wrapper {
+    display:block;
+  }
+  
+  
+	.ek_project_wrapper .project_info
+	{
+		
+		margin-right:0px;  
+	}  
+  
+  
+}
