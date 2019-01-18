@@ -2,9 +2,10 @@
 /*
 Plugin Name: Edukit Project Picker
 Description: Create Projects for student choice
-Version: 0.1
+Version: 0.1.1
 Author: Alex Furr
 License: GPL
+GitHub Plugin URI: https://github.com/ImperialCollegeLondon/ek-project-picker
 */
 define( 'PP_URL', plugins_url('ek-project-picker' , dirname( __FILE__ )) );
 define( 'PP_PATH', plugin_dir_path(__FILE__) );
