@@ -5,7 +5,7 @@ $projectID = get_the_ID();
 $fullScreen = true;
 $siteURL = get_site_url();
 
-get_header(); ?> 
+get_header(); ?>
 
 <main id="content">
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -15,7 +15,7 @@ get_header(); ?>
 <br/>
 <a href="<?php echo $siteURL; ?>/project-list/"><i class="fas fa-chevron-circle-left"></i> Back to Project List</a>
 
-<h1 class="entry-title"><?php the_title(); ?></h1> 
+<h1 class="entry-title"><?php the_title(); ?></h1>
 </header>
 <div class="entry-content">
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
@@ -49,7 +49,7 @@ echo '<div class="ek_project_wrapper">';
 echo '<div class="project_info">';
 echo 'Supervisor(s) : <a href="mailto:'.$supervisorEmail.'">'.$supervisorNameStr.'</a><br/>';
 echo 'Department : '.$projectDept.'<br/>';
-echo 'Section : '.$projectSection.'<br/>';  
+echo 'Section : '.$projectSection.'<br/>';
 
 the_content();
 

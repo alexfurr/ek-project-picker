@@ -1,0 +1,21 @@
+
+/* ADMIN PROJECT TYPE META */
+.project_meta_item
+{
+
+    margin-bottom:20px;
+    border:1px solid #ccc;
+    padding:10px;
+
+}
+.project_meta_item label
+{
+    display:block;
+    padding-top:10px;
+}
+
+.project_meta_item textarea
+{
+    height:100px;
+    width:400px;
+}

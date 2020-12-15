@@ -14,7 +14,7 @@
 #basket-add-success-div
 {
 	border:1px solid green;
-	
+
 	background:#fbfff9;
 	border-radius:3px;
 	padding:8px;
@@ -32,7 +32,7 @@
 {
 	padding-top:10px;
 	color:red;
-	
+
 }
 .ek-basket-remove-confirm
 {
@@ -113,8 +113,8 @@
 	padding:10px;
 	background:#fbfff9;
 	border-radius:3px;
-	font-weight:bold;	
-	
+	font-weight:bold;
+
 }
 
 .dataTable th
@@ -130,19 +130,19 @@
 
 .ek_project_wrapper
 {
-	display:flex;	
-	
+	display:flex;
+
 }
 
 .ek_project_wrapper > div
 {
-	
+
 }
 
 .ek_project_wrapper .project_info
 {
 	flex-grow: 1;
-	margin-right:80px;  
+	margin-right:80px;
 }
 
 
@@ -159,13 +159,13 @@
   .ek_project_wrapper {
     display:block;
   }
-  
-  
+
+
 	.ek_project_wrapper .project_info
 	{
-		
-		margin-right:0px;  
-	}  
-  
-  
+
+		margin-right:0px;
+	}
+
+
 }

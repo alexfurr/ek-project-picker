@@ -127,6 +127,7 @@ class ek_ppAjax
 	
 	function finaliseBasket()
 	{
+		$str='';
 		// Check the AJAX nonce				
 		check_ajax_referer( 'saveBasket_ajax_nonce', 'security' );
 		
@@ -136,22 +137,45 @@ class ek_ppAjax
 		$projectTypeID = $_POST['projectTypeID'];
 		
 		
-		$myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
+		// Check they have the valid number of basket entries in case they have two tabs and deleted some
+		$myCompleteProjectBasket = get_user_meta($userID, 'ekProjectBasket', true);	
+		// Get current Basket Items
+		$args = array(
+			"projectTypeID"	=> $projectTypeID,
+			"userID"	=> $userID,
+		);		
+		$myProjectBasket= ek_projects_queries::getUserBasket($args);		
+		$itemCount = count ($myProjectBasket);
 
-		if(!is_array($myFinalisedProjects) )
+		$minItems= get_post_meta( $projectTypeID, 'minItems', true );		
+		$maxItems= get_post_meta( $projectTypeID, 'maxItems', true );		
+
+		if($itemCount >= $minItems && $itemCount <=$maxItems)
 		{
-			$myFinalisedProjects = array();
+			
+	
+		
+			$myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
+
+			if(!is_array($myFinalisedProjects) )
+			{
+				$myFinalisedProjects = array();
+			}
+			
+			$currentDate = date('Y-m-d H:i:s');
+			
+			$myFinalisedProjects[$projectTypeID] = $currentDate;
+			
+			update_user_meta( $userID, "ekFinalisedProjects", $myFinalisedProjects );
+		}
+		else
+		{
+			$str.='You have too few or too many items in your basket';
 		}
 		
-		$currentDate = date('Y-m-d H:i:s');
+		$str.= ek_pp_draw::drawBasketWidget($projectTypeID);
 		
-		$myFinalisedProjects[$projectTypeID] = $currentDate;
-		
-		update_user_meta( $userID, "ekFinalisedProjects", $myFinalisedProjects );
-		
-		$basketStr = ek_pp_draw::drawBasketWidget($projectTypeID);
-		
-		echo $basketStr;
+		echo $str;
 		
 		
 		die();
