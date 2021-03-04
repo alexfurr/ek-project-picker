@@ -32,6 +32,13 @@ class ekPP
 
 		//add_filter('the_content', array($this, 'hideTheContentFromProjects') ,11);
 
+        // Check for actions
+        add_action( 'init', array( $this, 'check_for_actions' ) );
+
+
+
+
+
 
 	}
 
@@ -71,8 +78,9 @@ class ekPP
 	function frontendEnqueues ()
 	{
 		//Scripts
-		wp_enqueue_script('jquery');
-
+        wp_enqueue_script('jquery');
+        wp_enqueue_script( 'jquery-ui-core' );
+        wp_enqueue_script( 'jquery-ui-sortable' );
 		// Custom Styles
 		wp_enqueue_style( 'ek-pp-css', PP_URL . '/styles.css' );
 
@@ -143,6 +151,15 @@ class ekPP
         $myCapability = "delete_others_pages";
         add_submenu_page($parentMenuSlug, $page_title, $menu_title, $myCapability, $menu_slug, $function);
 
+        $parentMenuSlug= '';
+        /* Network Admin Users */
+        $page_title="Project Meta";
+        $menu_title="Project Meta";
+        $menu_slug="imperial-projects-csv-upload";
+        $function=  array( $this, 'drawCSV_upload' );
+        $myCapability = "delete_others_pages";
+        add_submenu_page($parentMenuSlug, $page_title, $menu_title, $myCapability, $menu_slug, $function);
+
 	}
 
 
@@ -152,10 +169,58 @@ class ekPP
 	}
 
 
-	function drawProjectMetaAdmin()
+	function drawCSV_upload()
 	{
-		include_once( dirname(__FILE__) . '/admin/projects_meta.php');
+		include_once( dirname(__FILE__) . '/admin/projects_upload.php');
 	}
+
+
+
+
+
+    function check_for_actions()
+    {
+        if(isset($_GET['action']) )
+        {
+
+            $action = $_GET['action'];
+
+            switch ($action)
+            {
+
+
+                case "finalise-choices-confirm":
+
+                    $item_list = $_POST['item_list'];
+                    $projectTypeID = $_POST['projectTypeID'];
+                    $basketArray = explode(',', $item_list);
+                    // Remove blanks
+                    $basketArray = array_filter($basketArray);
+                    $myProjectBasket = array();
+                    $myProjectBasket[$projectTypeID] = $basketArray;
+
+                    $userID = get_current_user_id();
+                    update_user_meta( $userID, "ekProjectBasket", $myProjectBasket );
+
+                    // Also uodate the fact its finaLISED
+                    $currentDate = date('Y-m-d H:i:s');
+                    $myFinalisedProjects[$projectTypeID] = $currentDate;
+                    update_user_meta( $userID, "ekFinalisedProjects", $myFinalisedProjects );
+
+                    $url = "?view=finalise-confirmed";
+                    wp_redirect( $url );
+
+
+                    exit;
+                break;
+
+
+            }
+
+
+        }
+
+    }
 
 }
 

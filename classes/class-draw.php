@@ -25,18 +25,29 @@ class ek_pp_draw
 	static function drawProjectsPage($projectTypeID)
 	{
 
+        $view = isset($_GET['view']) ? $_GET['view'] : '';
+
+        switch ($view)
+        {
+
+            case "project":
+                $project_id = $_GET['project-id'];
+                $html =  ek_pp_draw::drawProject($project_id);
+            break;
+
+            case "finalise-check":
+            $html =  ek_pp_draw::finalise_choices($projectTypeID);
+            break;
+
+            case "finalise-confirmed":
+            $html =  ek_pp_draw::finalise_choices_confirm($projectTypeID);
+            break;
 
 
-		if(isset($_GET['projectID']) )
-		{
-			$projectID = $_GET['projectID'];
-			$html =  ek_pp_draw::drawProject($projectID);
-		}
-		else
-		{
-			$html =  ek_pp_draw::drawProjectsTable($projectTypeID);
-		}
-
+            default:
+                $html =  ek_pp_draw::drawProjectsTable($projectTypeID);
+            break;
+        }
 
 
 		return $html;
@@ -113,25 +124,36 @@ class ek_pp_draw
 		$content = $post_content->post_content;
 		$html.= apply_filters('the_content',$content);
 
-        // Also add any custom meta
+        $this_post_meta = get_post_meta($projectID);
+        $project_type = $this_post_meta['project_type'][0];
+        $wet_dry = $this_post_meta['wet_dry'][0];
+        $supervisor_name = $this_post_meta['supervisorName'][0];
+        $supervisor_email = $this_post_meta['supervisorEmail'][0];
+        $keywords = unserialize($this_post_meta['keywords'][0]);
 
-        $project_custom_meta = get_post_meta($projectTypeID, 'pp_custom_meta', true);
+        $other_meta = unserialize($this_post_meta['project_meta'][0]);
 
-        foreach ($project_custom_meta as $this_id => $this_meta)
+
+        $html.= '<h3>Supervisor</h3>';
+        $html.= '<a href="mailto:'.$supervisor_email.'">'.$supervisor_name.'</a>';
+        $html.= '<h3>Project Type</h3>';
+        $html.= $project_type.' ('.$wet_dry.')';
+
+
+        foreach ($other_meta as $this_meta)
         {
-            $meta_name = $this_meta['meta_name'];
-
-            if($meta_name)
+            foreach($this_meta as $meta_title => $meta_value)
             {
-                $html.= '<h3>'.$meta_name.'</h3>';
-                $this_meta_lookup = 'pp_meta_value_'.$this_id;
-                $this_value = get_post_meta($projectID, $this_meta_lookup, true);
-                $html.= stripslashes($this_value);
-
+                $html.= '<h3>'.$meta_title.'</h3>'.$meta_value;
             }
 
-
         }
+
+
+
+
+        $html.='<hr/>';
+
 
 
 
@@ -191,7 +213,6 @@ class ek_pp_draw
 		$html.= '<div class="project_side">';
 
 
-
 		$html.= '<div id="imperialBasketDiv">';
 		$basketStr = ek_pp_draw::drawBasketWidget($projectTypeID);
 		$html.= $basketStr;
@@ -229,92 +250,46 @@ class ek_pp_draw
 		$html.='<div id="tableLoader">Loading projects...</div>';
         $html.= '<table id="projectsTable" class="ek-hidden">';
         //$html.= '<table id="projectsTable" >';
-		$html.= '<thead><tr><th>Project Name</th><th>Supervisor</th>';
-        // ADd custom columns
-
-        // Create custom lookup array for the meta IDs
-        $custom_meta_ids = array();
-        foreach ($project_custom_meta as $this_id => $this_meta)
-        {
-            if($this_meta['meta_show_in_table']=="on")
-            {
-                $this_name = $this_meta['meta_name'];
-                $html.= '<th>'.$this_name.'</th>';
-                $custom_meta_ids[] = $this_id;
-            }
-        }
-
-        $html.='<th>Tags</th></tr></thead>';
+		$html.= '<thead><tr><th>Project Name</th><th>Project Type</th><th>Supervisor</th><th>Keywords</th></tr></thead>';
 
 		foreach($projectList as $projectInfo)
 		{
-			$html.='<tr>';
 			$projectID = $projectInfo->ID;
 			$projectName = $projectInfo->post_title;
 			//$projectInfo = $projectInfo->post_content;
 
-			$projectLeads = get_post_meta( $projectID, 'projectLeadsArray', true );
-
             $this_post_meta = get_post_meta($projectID);
 
 
-			$leadName = "";
-			$leadEmail = "";
-			if(is_array($projectLeads) )
-			{
-				$leadName = $projectLeads[0]['name'];
-				$leadEmail = $projectLeads[0]['email'];
-			}
 
+            $project_type = $this_post_meta['project_type'][0];
+            $wet_dry = $this_post_meta['wet_dry'][0];
+            $supervisor_name = $this_post_meta['supervisorName'][0];
+            $supervisor_email = $this_post_meta['supervisorEmail'][0];
+            $keywords = unserialize($this_post_meta['keywords'][0]);
 
 
 			// Get the current page URL
 			$projectURL = get_the_permalink();
-			$html.= '<td><a href="'.$projectURL.'?projectID='.$projectID.'">'.$projectName.'</a>';
+
+
+            $html.='<tr>';
+			$html.= '<td><a href="'.$projectURL.'?view=project&project-id='.$projectID.'">'.$projectName.'</a>';
 			if(in_array($projectID, $myProjectBasket) )
 			{
 				$html.= '<br/><span class="projectTableChosenItem">This is in your basket</span>';
 			}
 			$html.='</td>';
-			$html.='<td>';
 
-			if($leadName<>"")
-			{
-				$html.=$leadName;
-			}
+            $html.='<td>'.$project_type.'<br/>'.$wet_dry.'</td>';
 
-			$html.='</td>';
-
-
-            // Now add the custom meta
-            foreach ($custom_meta_ids as $this_id)
+			$html.='<td><a href="mailto:'.$supervisor_email.'">'.$supervisor_name.'</a></td>';
+            $html.='<td class="smallText">';
+            foreach ($keywords as $this_keyword)
             {
-                $this_meta_lookup = 'pp_meta_value_'.$this_id;
-                $html.= '<td>';
-                $html.=$this_post_meta[$this_meta_lookup][0];
-                $html.= '</td>';
+                $html.=$this_keyword.'<br/>';
             }
-
-
-			$html.='<td>';
-
-
-			$terms = get_the_terms( $projectID, 'ek-project-tags' );
-
-			if(!is_array($terms) )
-			{
-				$html.= '-';
-			}
-			else
-			{
-				foreach ( $terms as $term ) {
-					$html.= $term->name.'<br/>';
-				}
-			}
-
-
-
-			$html.='</td>';
+            $html.='</td>';
 
 			$html.'</tr>';
 		}
@@ -354,8 +329,13 @@ class ek_pp_draw
 
 	static function drawBasketWidget($projectTypeID)
 	{
-		$minItems= get_post_meta( $projectTypeID, 'minItems', true );
-		$maxItems= get_post_meta( $projectTypeID, 'maxItems', true );
+
+
+
+        $minItems= get_post_meta( $projectTypeID, 'minItems', true );
+        $maxItems= get_post_meta( $projectTypeID, 'maxItems', true );
+        $allow_ordering= get_post_meta( $projectTypeID, 'allow_ordering', true );
+
 		$userID = get_current_user_id();
 		$myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
 
@@ -369,7 +349,6 @@ class ek_pp_draw
 			}
 		}
 
-
 		// Get current Basket Items
 		$args = array(
 			"projectTypeID"	=> $projectTypeID,
@@ -381,13 +360,10 @@ class ek_pp_draw
 		$myProjectBasket= ek_projects_queries::getUserBasket($args);
 		$itemCount = count ($myProjectBasket);
 
-
 		$html='';
 
 		$html.='<div class="basketWrap">';
 		$html.='<h1><i class="fas fa-shopping-cart"></i> My Basket</h1>';
-
-
 
 		if($finalised==true)
 		{
@@ -411,23 +387,30 @@ class ek_pp_draw
 				}
 			}
 
-
 			if($itemCount>=$minItems && $itemCount<=$maxItems &&  $finalised==false)
 			{
 
-
-
 				$html.='<div class="finaliseProjectsDiv">';
-				$html.='<button class="finaliseProjectsButton" id="finaliseProjectsButton">Finalise my choices</button>';
-				$html.='<div id="finaliseConfirmDiv" class="alertText" style="display:none">';
-				$html.='Are you sure you want to finalise these choices?<br/>';
-				$html.='This cannot be undone!<br/>';
-				$html.='<button class="finaliseProjectsConfirm" id="finaliseProjectsConfirm_'.$projectTypeID.'">Yes, finalise my choices</button>';
-				$html.='</div>';
+
+
+                if($allow_ordering==true)
+                {
+                    $html.='<a href="?view=finalise-check" class="imperial-button"" id="finaliseProjectsButton">Finalise my choices</a>';
+                }
+                else
+                {
+                    $html.='<button class="finaliseProjectsButton" id="finaliseProjectsButton">Finalise my choices</button>';
+                    $html.='<div id="finaliseConfirmDiv" class="alertText" style="display:none">';
+                    $html.='Are you sure you want to finalise these choices?<br/>';
+                    $html.='This cannot be undone!<br/>';
+                    $html.='<button class="finaliseProjectsConfirm" id="finaliseProjectsConfirm_'.$projectTypeID.'">Yes, finalise my choices</button>';
+                    $html.='</div>';
+                }
+
+
 				$html.='</div>';
 
 			}
-
 
 
 
@@ -631,6 +614,136 @@ class ek_pp_draw
 
 
 	}
+
+
+    public static function finalise_choices($projectTypeID)
+    {
+        $html = '';
+
+		$userID = get_current_user_id();
+
+		// Get current Basket Items
+		$args = array(
+			"projectTypeID"	=> $projectTypeID,
+			"userID"	=> $userID,
+		);
+
+        $html.='<a href="?">Back to project list</a><hr/>';
+
+
+		$myProjectBasket= ek_projects_queries::getUserBasket($args);
+
+        $html.= 'Here are your choices. Please order them below.';
+
+
+        $i=1;
+
+        $html.='<form action="?action=finalise-choices-confirm" method="post">';
+        $html.='<div id="finalise-basket">';
+
+        $hidden_string = '';
+		foreach($myProjectBasket as $thisItemID)
+		{
+
+			$html.='<div class="projectBasketItem">';
+			$projectTitle = get_the_title($thisItemID);
+			$projectURL = '?projectID='.$thisItemID;
+            $html.='<div class="project_select_number" data-id="'.$thisItemID.'">'.$i.'. </div>';
+			$html.= '<div class="projectBasketItemTitle">';
+			$html.='<a href="'.$projectURL.'">'.$projectTitle.'</a></div>';
+
+			$html.='</div>';// end of project item div
+            $i++;
+
+            $hidden_string.=$thisItemID.',';
+		}
+        $html.='<div>';
+
+
+        $html.='<input type="submit" class="imperial-button" value="Finalise these choices">';
+
+
+        $html.='<input type="hidden" value="'.$hidden_string.'" name="item_list" id="item_list">';
+        $html.='<input type="hidden" value="'.$projectTypeID.'" name="projectTypeID" id="projectTypeID">';
+        $html.='</form>';
+
+        $html.='<script>
+
+
+         jQuery(function () {
+             jQuery("#finalise-basket").sortable({
+                 update: function () {
+                     var item_string = "";
+                     jQuery("#finalise-basket .project_select_number").each(function (i) {
+                         var this_id = jQuery(this).attr("data-id");
+                         var humanNum = i + 1;
+                         jQuery(this).html(humanNum + ".");
+                         item_string = item_string +this_id + ",";
+                     });
+                     console.log("FINAL = "+item_string);
+
+                     jQuery("#item_list").val(item_string);
+
+                 }
+             });
+             jQuery( "#finalise-basket" ).disableSelection();
+
+         });
+
+
+
+        </script>';
+
+
+        return $html;
+
+
+    }
+
+    public static function finalise_choices_confirm($projectTypeID)
+    {
+        $html = '';
+
+        $userID = get_current_user_id();
+
+        // Get current Basket Items
+        $args = array(
+            "projectTypeID"	=> $projectTypeID,
+            "userID"	=> $userID,
+        );
+
+        $html.='<a href="?">Back to project list</a><hr/>';
+
+
+        $myProjectBasket= ek_projects_queries::getUserBasket($args);
+
+        $html.= 'Thank you! Your choices have been finalised.';
+
+
+        $i=1;
+
+        $html.='<div id="finalise-basket">';
+        foreach($myProjectBasket as $thisItemID)
+        {
+            $html.='<div class="projectBasketItem bassortable">';
+            $projectTitle = get_the_title($thisItemID);
+            $projectURL = '?projectID='.$thisItemID;
+            $html.='<div class="project_select_number">'.$i.'. </div>';
+            $html.= '<div class="projectBasketItemTitle">';
+            $html.='<a href="'.$projectURL.'">'.$projectTitle.'</a></div>';
+
+            $html.='</div>';// end of project item div
+            $i++;
+        }
+        $html.='<div>';
+
+
+
+
+        return $html;
+
+
+    }
 
 
 

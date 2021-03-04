@@ -145,15 +145,18 @@ class ek_projects_cpt
 		$columns['date']
 		);
 		// Remove Checkbox
-		unset(
-		$columns['cb']
-		);
+
 
 
 	//	$columns['pot_name'] = 'Pot Name';
-		$columns['projectTags'] = 'Project Tags';
+		//$columns['projectTags'] = 'Project Tags';
 
-		$columns['projectType'] = 'Project Type';
+        //	$columns['projectType'] = 'Project Type';
+
+
+        $columns['project_code'] = 'Project Code';
+
+        $columns['project_type'] = 'Project type';
 		return $columns;
 	}
 
@@ -163,6 +166,21 @@ class ek_projects_cpt
 
 		switch ($column_name)
 		{
+
+            case "projectType":
+                $project_type = get_post_meta($post_ID, "project_type", true);
+                echo $project_type;
+            break;
+
+            case "project_code":
+                $project_code = get_post_meta($post_ID, "project_code", true);
+                echo $project_code;
+            break;
+
+
+
+
+
 
 			case "projectType":
 
@@ -210,12 +228,13 @@ class ek_projects_cpt
 
 		global $post;
 
+
 		//Question Meta Metabox
 		$id 			= 'project_meta';
 		$title 			= 'Project Information';
 		$drawCallback 	= array( $this, 'drawProjectMetaBox' );
 		$screen 		= 'ek_project';
-		$context 		= 'side';
+		$context 		= 'normal';
 		$priority 		= 'default';
 		$callbackArgs 	= array();
 
@@ -229,6 +248,7 @@ class ek_projects_cpt
 			$callbackArgs
 		);
 
+        /*
         //Question Meta Metabox
         $id 			= 'project_meta_options';
         $title 			= 'Project Meta';
@@ -247,55 +267,75 @@ class ek_projects_cpt
             $priority,
             $callbackArgs
         );
+        */
 	}
 
 	function drawProjectMetaBox($post,$callbackArgs)
-	{
-		$projectLeadName = '';
-		$projectLeadEmail='';
+    {
 
+        $project_meta = get_post_meta($post->ID);
 
-		// Project Leads
-		$projectLeadsArray = get_post_meta($post->ID, "projectLeadsArray", true);
-
-		if(is_array($projectLeadsArray))
-		{
-			$projectLeadName = $projectLeadsArray[0]['name'];
-			$projectLeadEmail = $projectLeadsArray[0]['email'];
-		}
-
-
-
-		echo '<label for="projectLeadName">Project Lead</label><br/>';
-		echo '<input type="text" value="'.$projectLeadName.'" name="projectLeadName">';
-		echo '<hr/>';
-		echo '<label for="projectLeadName">Project Lead Email</label><br/>';
-		echo '<input type="text" value="'.$projectLeadEmail.'" name="projectLeadEmail">';
-
-
-
-
-
-		// hiiden input for project type ID
-		if(isset($_GET['projectTypeID']) )
-		{
-			$projectTypeID = $_GET['projectTypeID'];
-		}
-		else
-		{
-			$projectTypeID = wp_get_post_parent_id( $post->ID );
-		}
-
-
-		echo '<input type="hidden" value="'.$projectTypeID.'" name="projectTypeID">';
+        printArray($project_meta);
 
 
 		wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
 
 
-
-
 	}
+
+    function drawProjectMetaBox_old($post,$callbackArgs)
+    {
+        $projectLeadName = '';
+        $projectLeadEmail='';
+
+        $project_meta = get_post_meta($post->ID);
+
+
+        printArray($project_meta);
+
+        /*
+        // Project Leads
+        $projectLeadsArray = get_post_meta($post->ID, "projectLeadsArray", true);
+
+        if(is_array($projectLeadsArray))
+        {
+            $projectLeadName = $projectLeadsArray[0]['name'];
+            $projectLeadEmail = $projectLeadsArray[0]['email'];
+        }
+
+        echo '<label for="projectLeadName">Project Lead</label><br/>';
+        echo '<input type="text" value="'.$projectLeadName.'" name="projectLeadName">';
+        echo '<hr/>';
+        echo '<label for="projectLeadName">Project Lead Email</label><br/>';
+        echo '<input type="text" value="'.$projectLeadEmail.'" name="projectLeadEmail">';
+        */
+
+
+
+
+
+
+
+        // hiiden input for project type ID
+        if(isset($_GET['projectTypeID']) )
+        {
+            $projectTypeID = $_GET['projectTypeID'];
+        }
+        else
+        {
+            $projectTypeID = wp_get_post_parent_id( $post->ID );
+        }
+
+
+        echo '<input type="hidden" value="'.$projectTypeID.'" name="projectTypeID">';
+
+
+        wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
+
+
+
+
+    }
 
 
     public static function drawProjectMetaOptionsBox($post,$callbackArgs)
@@ -311,9 +351,13 @@ class ek_projects_cpt
 			$projectTypeID = wp_get_post_parent_id( $post->ID );
 		}
 
-
         $meta_options = get_post_meta($projectTypeID, 'pp_custom_meta', true);
 
+        if(!is_array($meta_options) )
+        {
+
+            $meta_options = array();
+        }
 
         foreach ($meta_options as $this_id => $these_options)
         {
@@ -331,7 +375,7 @@ class ek_projects_cpt
             $meta_options = $these_options['meta_options'];
             $this_value = trim(get_post_meta($post->ID, 'pp_meta_value_'.$this_id, true));
 
-            
+
             echo '<label for="pp_meta_value_'.$this_id.'">'.$meta_name.'</label><br/>';
 
             switch ($meta_type)

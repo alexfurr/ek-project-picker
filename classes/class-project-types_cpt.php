@@ -110,6 +110,16 @@ class ek_project_types_cpt
 		add_submenu_page($parentSlug, $page_title, $menu_title, $myCapability, $menu_slug, $function);
 
 
+		/* Project Meta Page */
+		$parentSlug = "";
+		$page_title="Project Meta";
+		$menu_title="Project Meta";
+		$menu_slug="imperial-import-projects";
+		$function=  array( $this, 'drawProjectsMetaPage' );
+		$myCapability = "delete_others_pages";
+		add_submenu_page($parentSlug, $page_title, $menu_title, $myCapability, $menu_slug, $function);
+
+
 	}
 
 
@@ -141,7 +151,7 @@ class ek_project_types_cpt
 	//	$columns['pot_name'] = 'Pot Name';
 		$columns['add_project'] = '';
 		$columns['project_overview'] = 'Projects';
-        $columns['project_meta'] = 'Project Meta';
+
 
 	  	$columns['shortcode'] = 'Shortcode';
         $columns['data'] = 'Student Choices';
@@ -164,10 +174,8 @@ class ek_project_types_cpt
 
 				$projectCount = count($myProjects);
 
-				echo $projectCount.' projects found';
-
-
-
+				echo $projectCount.' projects found<br/>';
+                echo '<a href="edit.php?page=imperial-projects-csv-upload&ID='.$post_ID.'">Import Projects</a>';
 
 			break;
 
@@ -191,11 +199,6 @@ class ek_project_types_cpt
 
 			break;
 
-            case "project_meta":
-
-                echo '<a href="edit.php?page=ek_project_meta&ID='.$post_ID.'" class="button-secondary">Project Meta</a>';
-
-            break;
 
 
 		}
@@ -230,6 +233,8 @@ class ek_project_types_cpt
 	function drawProjectMetaBox($post,$callbackArgs)
 	{
 
+        wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
+
 		$minItems = get_post_meta($post->ID, "minItems", true);
 		if($minItems=="")
 		{
@@ -244,6 +249,9 @@ class ek_project_types_cpt
 		}
 
 
+        $allow_ordering = get_post_meta($post->ID, "allow_ordering", true);
+        if($allow_ordering=="on"){$allow_ordering='checked ';}
+
 
 		echo '<b>Finalise Options</b><br/>';
 
@@ -251,13 +259,13 @@ class ek_project_types_cpt
 		echo '<input type="textbox" value="'.$minItems.'" name="minItems" size="2"><hr/>';
 
 
-
 		echo '<label for="maxItems">Max number of basket items</label><br/>';
 		echo '<input type="textbox" value="'.$maxItems.'" name="maxItems" size="2">';
-		wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
 
+        echo '<hr/>';
 
-
+        echo '<label for="allow_ordering">';
+        echo '<input type="checkbox" name="allow_ordering" id="allow_ordering" '.$allow_ordering.'>Allow students to order their basket choices</label>';
 
 	}
 
@@ -295,13 +303,14 @@ class ek_project_types_cpt
 				return $postID;
 			}
 
+            $allow_ordering = isset($_GET['allow_ordering']) ? $_GET['allow_ordering'] : '';
 
 			$maxItems = $_POST['maxItems'];
-			$minItems = $_POST['minItems'];
+            $minItems = $_POST['minItems'];
+            $allow_ordering = $_POST['allow_ordering'];
 			update_post_meta( $postID, 'maxItems', $maxItems );
-			update_post_meta( $postID, 'minItems', $minItems );
-
-
+            update_post_meta( $postID, 'minItems', $minItems );
+            update_post_meta( $postID, 'allow_ordering', $allow_ordering );
 
 		}
 

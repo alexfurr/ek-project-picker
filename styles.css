@@ -153,6 +153,20 @@
 }
 
 
+#finalise-basket .projectBasketItem
+{
+    display:flex;
+}
+
+#finalise-basket .projectBasketItem:hover
+{
+    cursor:move;
+}
+
+.project_select_number
+{
+    width:40px;
+}
 
 
 @media screen and (max-width: 600px) {
