@@ -16,7 +16,7 @@ class ek_pp_draw
 
 		$projectTypeID = (int) $atts['id'];
 
-		echo ek_pp_draw::drawProjectsPage($projectTypeID);
+		return ek_pp_draw::drawProjectsPage($projectTypeID);
 
 
 	}
