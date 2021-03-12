@@ -395,7 +395,7 @@ class ek_pp_draw
 
                 if($allow_ordering==true)
                 {
-                    $html.='<a href="?view=finalise-check" class="imperial-button"" id="finaliseProjectsButton">Finalise my choices</a>';
+                    $html.='<a href="?view=finalise-check" class="imperial-button"" id="finaliseProjectsButton">Order my choices</a>';
                 }
                 else
                 {
@@ -660,6 +660,8 @@ class ek_pp_draw
         $html.='<div>';
 
 
+        $html.='<div class="imperial-feedback imperial-feedback-error">Once you are happy with your order, click the button below to finalise.<br/>';
+        $html.='Once submitted your project choices cannot be changed!</div>';
         $html.='<input type="submit" class="imperial-button" value="Finalise these choices">';
 
 
@@ -706,6 +708,13 @@ class ek_pp_draw
 
         $userID = get_current_user_id();
 
+        $current_user = wp_get_current_user();
+        $current_username =  $current_user->user_login;
+
+        // get the email
+        $current_user_info = imperialQueries::getUserInfo($current_username);
+        $current_email = $current_user_info['email'];
+
         // Get current Basket Items
         $args = array(
             "projectTypeID"	=> $projectTypeID,
@@ -717,16 +726,19 @@ class ek_pp_draw
 
         $myProjectBasket= ek_projects_queries::getUserBasket($args);
 
-        $html.= 'Thank you! Your choices have been finalised.';
+
+        $html.= '<div class="imperial-feedback imperial-feedback-success">Thank you! Your choices have been finalised. Please check your email for a confirmation.</div>';
 
 
         $i=1;
 
         $html.='<div id="finalise-basket">';
+        $email_str = 'Thank you for submitting your project selections. Please see your selections and order below<br/><br/>';
         foreach($myProjectBasket as $thisItemID)
         {
             $html.='<div class="projectBasketItem bassortable">';
             $projectTitle = get_the_title($thisItemID);
+            $email_str.=$i.'. '.$projectTitle.'<br/>';
             $projectURL = '?projectID='.$thisItemID;
             $html.='<div class="project_select_number">'.$i.'. </div>';
             $html.= '<div class="projectBasketItemTitle">';
@@ -737,7 +749,10 @@ class ek_pp_draw
         }
         $html.='<div>';
 
-
+        // Email the student
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        $subject = 'Your Project Selection Choice';
+        wp_mail($current_email, $subject, $email_str, $headers);
 
 
         return $html;
