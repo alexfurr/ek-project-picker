@@ -36,11 +36,12 @@ class ek_pp_draw
             break;
 
             case "finalise-check":
-            $html =  ek_pp_draw::finalise_choices($projectTypeID);
+
+                $html =  ek_pp_draw::finalise_choices($projectTypeID);
             break;
 
             case "finalise-confirmed":
-            $html =  ek_pp_draw::finalise_choices_confirm($projectTypeID);
+                $html =  ek_pp_draw::finalise_choices_confirm($projectTypeID);
             break;
 
 
@@ -228,6 +229,35 @@ class ek_pp_draw
 
 	static function drawProjectsTable($projectTypeID)
 	{
+
+
+        // Have they fnalised?
+        // Get current Basket Items
+        $userID = get_current_user_id();
+
+        $args = array(
+            "projectTypeID"	=> $projectTypeID,
+            "userID"	=> $userID,
+        );
+        $myProjectBasket= ek_projects_queries::getUserBasket($args);
+        $myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
+
+
+        if(array_key_exists($projectTypeID, $myFinalisedProjects) )
+        {
+
+            $html = '<h3>Here are your choices</h3>';
+            $html.= ek_pp_draw::draw_user_selection($projectTypeID);
+
+            return $html;
+
+        }
+
+
+
+
+
+
 		$html = '';
 
 		// Get the list of projects
@@ -285,9 +315,13 @@ class ek_pp_draw
 
 			$html.='<td><a href="mailto:'.$supervisor_email.'">'.$supervisor_name.'</a></td>';
             $html.='<td class="smallText">';
-            foreach ($keywords as $this_keyword)
+            if($keywords)
             {
-                $html.=$this_keyword.'<br/>';
+
+                foreach ($keywords as $this_keyword)
+                {
+                    $html.=$this_keyword.'<br/>';
+                }
             }
             $html.='</td>';
 
@@ -628,10 +662,19 @@ class ek_pp_draw
 			"userID"	=> $userID,
 		);
 
+
+
         $html.='<a href="?">Back to project list</a><hr/>';
 
-
 		$myProjectBasket= ek_projects_queries::getUserBasket($args);
+        $myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
+
+        if(array_key_exists($projectTypeID, $myFinalisedProjects) )
+        {
+             return 'Your choices have been finalised.';
+        }
+
+
 
         $html.= 'Here are your choices. Please order them below.';
 
@@ -702,11 +745,51 @@ class ek_pp_draw
 
     }
 
+    public static function draw_user_selection($projectTypeID)
+    {
+        $html = '';
+        $userID = get_current_user_id();
+
+        // Get the Projects
+        $args = array(
+            "projectTypeID"	=> $projectTypeID,
+            "userID"	=> $userID,
+        );
+
+        $myProjectBasket= ek_projects_queries::getUserBasket($args);
+        $i=1;
+        foreach ($myProjectBasket as $project_id)
+        {
+            $project_title = get_the_title($project_id);
+            $url = '?view=project&project-id='.$project_id;
+
+            $html.= '<a href="'.$url.'">'.$i.'.'.$project_title.'</a></hr>';
+            $i++;
+
+        }
+
+        return $html;
+
+
+    }
+
     public static function finalise_choices_confirm($projectTypeID)
     {
         $html = '';
 
         $userID = get_current_user_id();
+
+        $myFinalisedProjects = get_user_meta($userID, 'ekFinalisedProjects', true);
+
+        if(array_key_exists($projectTypeID, $myFinalisedProjects) )
+        {
+            $return = '';
+             $return.= '<div class="imperial-feedback imperial-feedback-success">Your choices have been finalised.</div>';
+
+             $return.=ek_pp_draw::draw_user_selection($projectTypeID);
+
+             return $return;
+     }
 
         $current_user = wp_get_current_user();
         $current_username =  $current_user->user_login;
@@ -720,14 +803,13 @@ class ek_pp_draw
             "projectTypeID"	=> $projectTypeID,
             "userID"	=> $userID,
         );
+        $myProjectBasket= ek_projects_queries::getUserBasket($args);
+
 
         $html.='<a href="?">Back to project list</a><hr/>';
 
 
-        $myProjectBasket= ek_projects_queries::getUserBasket($args);
-
-
-        $html.= '<div class="imperial-feedback imperial-feedback-success">Thank you! Your choices have been finalised. Please check your email for a confirmation.</div>';
+        $html.= '<div class="imperial-feedback imperial-feedback-success">Thank you! Your choices have been finalised.</div>';
 
 
         $i=1;
@@ -752,6 +834,8 @@ class ek_pp_draw
         // Email the student
         $headers = array('Content-Type: text/html; charset=UTF-8');
         $subject = 'Your Project Selection Choice';
+
+
         wp_mail($current_email, $subject, $email_str, $headers);
 
 
