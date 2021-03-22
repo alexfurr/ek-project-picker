@@ -22,6 +22,9 @@ if ( isset( $_GET['action'] ) )
 
 
 
+    $insert_count = 0;
+    $update_count = 0;
+
 	// Check the nonce before proceeding;
 	$retrieved_nonce="";
 	if(isset($_REQUEST['_wpnonce'])){$retrieved_nonce = $_REQUEST['_wpnonce'];}
@@ -50,6 +53,8 @@ if ( isset( $_GET['action'] ) )
                     $data_array = imperialNetworkUtils::getCSVdataAsArray($newFilename);
 
 
+
+
                     $line_no = 1;
 
                     // Which columns have keywords
@@ -58,6 +63,7 @@ if ( isset( $_GET['action'] ) )
 
                     foreach ($data_array as $this_row)
 					{
+
 
                         if($line_no==1)
                         {
@@ -83,6 +89,10 @@ if ( isset( $_GET['action'] ) )
                             $department		  = $this_row[5];
                             $projectType	= $this_row[6];
                             $wet_dry		= $this_row[7];
+
+
+                            $project_title = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', $project_title);
+                            $project_summary = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', $project_summary);
 
                             // Create blank array for the keywords
                             $this_keywords = array();
@@ -120,6 +130,7 @@ if ( isset( $_GET['action'] ) )
                             );
                             $check_query = new WP_Query($args);
 
+
                             if ( $check_query->have_posts() )
                             {
                                 while ( $check_query->have_posts() )
@@ -146,13 +157,12 @@ if ( isset( $_GET['action'] ) )
         							'post_content'  => $project_summary,
         							'post_status'   => 'publish',
         							'post_author'   => 1,
-        							'post_type'		=> 'ek_project'
+        							'post_type'		=> 'ek_project',
         						);
 
         						// Insert the post into the database.
         						$post_id = wp_insert_post( $my_post );
                                 $insert_count++;
-
 
                             }
 

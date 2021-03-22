@@ -275,7 +275,21 @@ class ek_projects_cpt
 
         $project_meta = get_post_meta($post->ID);
 
-        printArray($project_meta);
+
+        // hiiden input for project type ID
+        if(isset($_GET['projectTypeID']) )
+        {
+            $projectTypeID = $_GET['projectTypeID'];
+        }
+        else
+        {
+            $projectTypeID = wp_get_post_parent_id( $post->ID );
+        }
+
+
+        echo '$projectTypeID = '.$projectTypeID;
+
+        echo '<input type="hidden" value="'.$projectTypeID.'" name="projectTypeID">';
 
 
 		wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
@@ -315,19 +329,6 @@ class ek_projects_cpt
 
 
 
-
-        // hiiden input for project type ID
-        if(isset($_GET['projectTypeID']) )
-        {
-            $projectTypeID = $_GET['projectTypeID'];
-        }
-        else
-        {
-            $projectTypeID = wp_get_post_parent_id( $post->ID );
-        }
-
-
-        echo '<input type="hidden" value="'.$projectTypeID.'" name="projectTypeID">';
 
 
         wp_nonce_field( 'save_ek_project_metabox_nonce', 'ek_project_metabox_nonce' );
@@ -417,6 +418,7 @@ class ek_projects_cpt
 		if($post_type=="ek_project")
 		{
 
+
 			// Check if nonce is set.
 			if ( ! isset( $_POST['ek_project_metabox_nonce'] ) ) {
 				return;
@@ -445,6 +447,7 @@ class ek_projects_cpt
 			$projectTypeID = $_POST['projectTypeID'];
 
 
+
 			//If calling wp_update_post, unhook this function so it doesn't loop infinitely
 			remove_action('save_post', array($this, 'savePostMeta') );
 
@@ -458,6 +461,7 @@ class ek_projects_cpt
 
 			add_action('save_post', array($this, 'savePostMeta') );
 
+            /*
 			// Update the post meta
 			$projectLeadName = $_POST['projectLeadName'];
 			$projectLeadEmail=$_POST['projectLeadEmail'];
@@ -469,8 +473,12 @@ class ek_projects_cpt
 
 			update_post_meta( $postID, 'projectLeadsArray', $projectLeadsArray );
 
+            */
+
 
             // Update any custom options
+
+            /*
             $i=1;
             while ($i<=5)
             {
@@ -482,6 +490,7 @@ class ek_projects_cpt
                 update_post_meta( $postID, $check_name, $check_value );
                 $i++;
             }
+            */
 
 		}
 

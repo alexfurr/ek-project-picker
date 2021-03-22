@@ -763,7 +763,7 @@ class ek_pp_draw
             $project_title = get_the_title($project_id);
             $url = '?view=project&project-id='.$project_id;
 
-            $html.= '<a href="'.$url.'">'.$i.'.'.$project_title.'</a></hr>';
+            $html.= '<a href="'.$url.'">'.$i.'.'.$project_title.'</a><hr/>';
             $i++;
 
         }
